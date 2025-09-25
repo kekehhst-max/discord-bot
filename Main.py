@@ -87,15 +87,44 @@ async def timeout(interaction: discord.Interaction, member: discord.Member, dura
 @tree.command(name="announce", description="Send an announcement to all members in the server")
 @app_commands.describe(message="The message to send to all members")
 async def announce(interaction: discord.Interaction, message: str):
+    # Check if user has administrator permission
     if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message("❌ You don't have permission to make announcements.", ephemeral=True)
+        await interaction.response.send_message(
+            "❌ You don't have permission to make announcements.", ephemeral=True
+        )
         return
+
+    # Defer the interaction immediately to avoid timeout
+    await interaction.response.defer(ephemeral=True)
+
+    sent_count = 0
+    failed_count = 0
+
+    # Send DMs in small batches to avoid rate limits
     for member in interaction.guild.members:
+        # Skip bots
+        if member.bot:
+            continue
         try:
             await member.send(message)
+            sent_count += 1
         except discord.Forbidden:
-            continue
-    await interaction.response.send_message("✅ Announced message to all members.")
+            failed_count += 1
+        except discord.HTTPException:
+            # Handle temporary sending errors by waiting
+            await asyncio.sleep(1)
+            try:
+                await member.send(message)
+                sent_count += 1
+            except:
+                failed_count += 1
+        await asyncio.sleep(0.5)  # small delay between messages to prevent rate limit
+
+    # Report results
+    await interaction.followup.send(
+        f"✅ Announcement sent to {sent_count} members.\n"
+        f"⚠️ Could not send to {failed_count} members (DMs off or other error)."
+    )
 
 
 # --- /dailypoll Command ---
