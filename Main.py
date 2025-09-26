@@ -174,22 +174,25 @@ async def selfroleadd(
 async def post(
     interaction: discord.Interaction,
     title: str,
-    description: str = None,     # now optional
+    description: str = None,
     image_url: str = None
 ):
     # Build the embed text
     content = title
-    if description:  # only add if provided
+    if description:
         content += "\n\n" + description
 
     embed = discord.Embed(description=content, color=0x00ffcc)
+    
     if image_url:
-        embed.set_image(url="")
+        embed.set_image(url=image_url)  # <-- fixed
 
     # Acknowledge the interaction silently
     await interaction.response.defer(ephemeral=True)
-    # Send the embed as a normal message (not a reply)
+    
+    # Send the embed as a normal message
     await interaction.channel.send(embed=embed)
+
 
 
 # --- /ban Command ---
@@ -283,4 +286,5 @@ async def monitor_ticket_closure(message: discord.Message):
 # --- Run the Bot ---
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
+
 
