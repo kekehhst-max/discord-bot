@@ -184,7 +184,7 @@ async def post(
 
     embed = discord.Embed(description=content, color=0x00ffcc)
     if image_url:
-        embed.set_image(url="https://i.ibb.co/XZ080phr/WELCOME-1.png")
+        embed.set_image(url="")
 
     # Acknowledge the interaction silently
     await interaction.response.defer(ephemeral=True)
@@ -283,3 +283,4 @@ async def monitor_ticket_closure(message: discord.Message):
 # --- Run the Bot ---
 keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
+
